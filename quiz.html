@@ -2,113 +2,102 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>퀴즈 프레임</title>
+  <title>햄군 퀴즈 메신저</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      height: 100vh;
-     
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: sans-serif;
-      background-image: url('WebDesign/img/quiz_background.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-    }
-
-    .quiz-frame {
-      position: relative;
+      padding: 0;
       width: 708px;
       height: 642px;
-      background-image: url('img/quiz_frame.png'); /* ✅ 전체 프레임 배경 이미지 */
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-    }
-
-    .quiz-inner {
-      position: absolute;
-      top: 46px; /* 상단 제외 */
-      left: 0;
-      width: 100%;
-      height: 596px;
-      padding: 12px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      
+      font-family: sans-serif;
+      background-image: url('img/quiz_frame.png');
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
+      position: relative;
     }
 
-    #chatBox {
-      flex: 1;
-      overflow-y: auto;
+    .container {
+      position: absolute;
+      top: 46px;
+      left: 0;
+      width: 100%;
+      height: 596px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
     }
 
     .message {
-      max-width: 80%;
-      font-size: 14px;
-      line-height: 1.4;
-      padding: 10px;
-      border-radius: 12px;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 14px;
     }
 
     .hamgun {
       background: #fff;
-      align-self: flex-start;
+      color: #333;
+      padding: 10px 14px;
+      border-radius: 14px;
+      max-width: 70%;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
     .user {
+      text-align: right;
+    }
+
+    .user .msg {
       background: #dcf8c6;
-      align-self: flex-end;
+      color: #000;
+      padding: 10px 14px;
+      border-radius: 14px;
+      max-width: 70%;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
     .choices-inline {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     .choices-inline button {
       background: #ffd591;
       border: none;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
+      margin-top: 4px;
       cursor: pointer;
-      font-size: 13px;
       text-align: left;
     }
 
     .input-bar {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
+      padding: 10px;
+      background: #fff;
+      border-top: 1px solid #ddd;
     }
 
     .input-bar input {
       flex: 1;
-      padding: 6px;
-      font-size: 13px;
-      border-radius: 6px;
+      padding: 8px;
       border: 1px solid #ccc;
+      border-radius: 6px;
     }
 
     .input-bar button {
-      padding: 6px 10px;
-      font-size: 13px;
+      padding: 8px 12px;
+      background: #91d5ff;
       border: none;
       border-radius: 6px;
-      background: #91d5ff;
+      margin-left: 8px;
     }
 
     .hidden {
@@ -118,13 +107,12 @@
 </head>
 <body>
 
-<div class="quiz-frame">
-  <div class="quiz-inner">
-    <div id="chatBox"></div>
-    <div class="input-bar hidden" id="inputBar">
-      <input type="text" id="textAnswer" placeholder="답을 입력하세요..." />
-      <button onclick="handleText()">제출</button>
-    </div>
+<div class="container">
+  <div class="chat-box" id="chatBox"></div>
+
+  <div class="input-bar hidden" id="inputBar">
+    <input type="text" id="textAnswer" placeholder="답을 입력하세요..." />
+    <button onclick="handleText()">제출</button>
   </div>
 </div>
 
@@ -249,10 +237,9 @@ function scrollToBottom() {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+console.log("퀴즈 로딩 시작!");
 showQuiz();
 </script>
 
-
 </body>
 </html>
-
