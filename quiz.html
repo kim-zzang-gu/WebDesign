@@ -133,9 +133,22 @@ const quizData = [
     answer: '🥬 양상추'
   },
   {
+    type: 'choice',
+    question: '햄스터가 좋아하는 간식은?',
+    options: ['🍓 딸기', '🧀 치즈', '🍞 식빵'],
+    answer: '🧀 치즈'
+  },
+  {
     type: 'text',
-    question: '햄군의 이름은 뭘까요?',
+    question: '햄군의 이름을 입력해줘! (힌트: 🐹)',
     answer: '햄군'
+  },
+  {
+    type: 'image',
+    question: '이 동물은 누구일까요? 🐾',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Hamster.jpg/640px-Hamster.jpg',
+    options: ['햄스터', '기니피그', '쥐'],
+    answer: '햄스터'
   }
 ];
 
@@ -149,8 +162,9 @@ const textInput = document.getElementById('textAnswer');
 function showQuiz() {
   const q = quizData[currentIndex];
   const container = document.createElement('div');
-  container.className = 'message hamgun';
-  let innerHTML = `${q.question}`;
+  container.className = 'message';
+
+  let innerHTML = `<div class="hamgun">${q.question}`;
 
   if (q.type === 'choice') {
     innerHTML += `<div class="choices-inline">`;
@@ -162,8 +176,17 @@ function showQuiz() {
   } else if (q.type === 'text') {
     inputBar.classList.remove('hidden');
     setTimeout(() => textInput.focus(), 100);
+  } else if (q.type === 'image') {
+    innerHTML += `<br><img src="${q.image}" alt="이미지 퀴즈" style="max-width: 200px; border-radius: 8px; margin-top: 8px;" />`;
+    innerHTML += `<div class="choices-inline">`;
+    q.options.forEach(opt => {
+      innerHTML += `<button onclick="handleChoice('${opt.replace(/'/g, "\\'")}')">${opt}</button>`;
+    });
+    innerHTML += `</div>`;
+    inputBar.classList.add('hidden');
   }
 
+  innerHTML += `</div>`;
   container.innerHTML = innerHTML;
   chatBox.appendChild(container);
   scrollToBottom();
@@ -186,21 +209,18 @@ function handleText() {
 }
 
 function userMsg(text) {
-  const msg = document.createElement('div');
-  msg.className = 'message user';
-  msg.textContent = text;
-  chatBox.appendChild(msg);
+  const userDiv = document.createElement('div');
+  userDiv.className = 'message user';
+  userDiv.innerHTML = `<div class="msg">${text}</div>`;
+  chatBox.appendChild(userDiv);
   scrollToBottom();
 }
 
 function respond(correct, answer) {
   const res = document.createElement('div');
-  res.className = 'message hamgun';
-  res.innerHTML = correct
-    ? '✅ 정답이야! 잘했어!'
-    : `❌ 틀렸어! 정답은 <strong>${answer}</strong>야!`;
+  res.className = 'message';
+  res.innerHTML = `<div class="hamgun">${correct ? '✅ 정답이야! 잘했어! 🧀' : `❌ 틀렸어! 정답은 <strong>${answer}</strong>야!`}</div>`;
   chatBox.appendChild(res);
-
   if (correct) score++;
 
   currentIndex++;
@@ -215,8 +235,8 @@ function respond(correct, answer) {
 
 function showResult() {
   const result = document.createElement('div');
-  result.className = 'message hamgun';
-  result.innerHTML = `🎉 퀴즈 완료! <br> 총 ${quizData.length}문제 중 <strong>${score}개</strong> 맞췄어!`;
+  result.className = 'message';
+  result.innerHTML = `<div class="hamgun">🎉 퀴즈 완료! <br/>총 ${quizData.length}문제 중 <strong>${score}개</strong> 맞췄어!</div>`;
   chatBox.appendChild(result);
   scrollToBottom();
 }
@@ -227,6 +247,7 @@ function scrollToBottom() {
 
 showQuiz();
 </script>
+
 
 </body>
 </html>
