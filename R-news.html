@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>R-news</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fastly.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-family: 'Press Start 2P', 'Galmuri11', monospace; }
+    body {
+      background: #feffac url('img/pattern1.png') repeat;
+      background-size: 130px 65px;
+      animation: slidePattern 15s linear infinite;
+      min-height: 100vh;
+      padding: 96px 16px 32px;
+    }
+    @keyframes slidePattern {
+      from { background-position: 256px 0; }
+      to   { background-position: 0 256px; }
+    }
+
+    .container {
+      width: 1080px; height: 855px;
+      margin: -25px auto 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .window {
+      position: relative;
+      width: 1080px;
+      height: 855px;
+      background: url('img/frame2.png') no-repeat top left;
+      background-size: 1080px 855px;
+      overflow: hidden;
+    }
+
+    .title-bar {
+      position: absolute; top: 8px; left: 8px; right: 23px; height: 60px;
+      display: flex; align-items: center; justify-content: flex-end;
+      background: transparent; z-index: 2;
+    }
+    .title-bar .title-url {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #FFF;
+      border-radius: 18px;
+      padding: 6px 16px;
+      border: 2px solid #000;
+      z-index: 5;
+    }
+    .title-bar .title-url span {
+      color: #C85C1A;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .title-bar .title-buttons {
+      display: flex; gap: 8px; z-index: 10;
+      margin-right: 30px;
+    }
+    .title-bar .title-button {
+      width: 32px; height: 32px;
+      background: #FFF;
+      border-radius: 50%;
+      border: 3px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      color: #C85C1A;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .title-bar .title-button:hover {
+      background: #FDE1B4;
+    }
+
+    .main-content {
+      position: absolute; top: 75px; left: 0; right: 0; height: 713px;
+      display: flex; z-index: 1;
+    }
+
+    .sidebar {
+      position: absolute; top: 0px; left: 8px;
+      width: 105px; height: 713px;
+      display: flex; flex-direction: column; gap: 5px;
+      z-index: 2;
+    }
+    .sidebar a { display: flex; justify-content: center; text-decoration: none; }
+    .sidebar a button { margin: 5px 0; }
+
+    .sidebar-button {
+      position: relative;
+      width: 80px; height: 80px;
+      background: transparent url('img/btn_before.png') no-repeat center;
+      background-size: 80px 80px;
+      border: none;
+      cursor: pointer;
+      transition: background-image 0.1s;
+      z-index: 3;
+    }
+    .sidebar-button:hover { background-image: url('img/btn_hover.png'); }
+    .sidebar-button.active { background-image: url('img/btn_after.png'); }
+    .sidebar-button::before {
+      content: "";
+      position: absolute; top: 4px; left: calc(100% + 4px);
+      width: 120px; height: 60px;
+      background: url('img/tool.png') no-repeat center;
+      background-size: contain;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 10;
+    }
+    .sidebar-button::after {
+      content: attr(data-tooltip);
+      position: absolute; top: 20px; left: calc(100% + 4px);
+      width: 120px; text-align: center;
+      font-size: 14px; color: #000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 11;
+      font-family: 'Galmuri11', monospace;
+      font-weight: 700;
+    }
+    .sidebar-button:hover::before,
+    .sidebar-button:hover::after { opacity: 1; }
+    .sidebar-button img {
+      position: absolute; top: 50%; left: 48%;
+      width: 48px; height: 48px;
+      transform: translate(-50%, -50%);
+      pointer-events: none; transition: left 0.1s;
+    }
+    .sidebar-button.active img { left: 50%; }
+
+    .main-area {
+      position: absolute; top: 0; left: 120px;
+      width: 938px; height: 713px;
+      background: transparent;
+      padding: 0; overflow: auto; display: block;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .news-search-container {
+      width: 938px;
+      height: 713px;
+      background: url('img/news/search1.png') no-repeat center;
+      background-size: cover;
+      position: relative;
+    }
+
+    #go-btn {
+      position: absolute;
+      top: 53%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 98px;
+      height: 48px;
+      background: url('img/news/Go1.png') no-repeat center;
+      background-size: contain;
+      border: none;
+      cursor: pointer;
+    }
+
+    #go-btn:hover {
+      background-image: url('img/news/Go2.png');
+    }
+
+    .status-bar {
+      position: absolute; top: 793px; left: 45px;
+      width: 990px; height: 38px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: #C85C1A;
+      background: transparent; z-index: 2;
+    }
+    .status-bar span {
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #000;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    @keyframes floatUpDown {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+    .search-logo {
+    width: auto;
+    height: auto;
+    animation: floatUpDown 1.6s ease-in-out infinite;
+    image-rendering: pixelated;
+    margin-bottom: 280px;
+  }
+.news-result {
+  display: none; /* 처음엔 안 보이게 */
+  width: 100%;
+}
+
+.search-result-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 40px 60px;
+  gap: 70px;
+  width: 100%;
+  margin-top: 100px;
+  margin-left: 130px;
+}
+
+.search-result-list img {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  image-rendering: pixelated;
+  cursor: pointer;
+  display: block;
+  
+}
+
+/* 뉴스페이지*/
+.news-page {
+  width: 100%;
+  height: 100%;
+  background: url('img/news/news.png') no-repeat center;
+  background-size: cover;
+  position: relative;
+  padding: 60px 40px;
+  font-family: 'Galmuri11', monospace;
+}
+
+.back-button {
+  position: absolute;
+  top: 150px;
+  left: 30px;
+  width: 120px;
+  height: 30px;
+  background: url('img/news/back.png') no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+}
+
+.news-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 130px;
+  margin-bottom: 40px;
+}
+
+.news-content {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+}
+.news-image {
+  position: absolute;
+  top: 290px;     /* 위에서부터 거리 */
+  left: 100px;     /* 왼쪽에서부터 거리 */
+  width: 411px;   /* 필요 시 이미지 크기 */
+  height: 293px;
+  
+}
+.news-image img {
+  width: 300px;
+  height: auto;
+  image-rendering: pixelated;
+
+}
+
+.news-text {
+position: absolute;
+top :260px;
+left:480px;
+
+width: 411px;
+min-height: 300px;
+padding: 20px;
+
+
+font-size: 20px;
+line-height: 1.6;
+}
+
+.corner-gif {
+  position: absolute;
+  top : 190px;
+  left: 650px;
+  width: 80px;
+  height: auto;
+  z-index: 5;
+  image-rendering: pixelated;
+}
+.image-caption {
+  margin-top: 60px;
+  transform: translateX(-45px);
+  font-size: 16px;
+  text-align: center;
+  color: #333;
+  font-family: 'Galmuri11', monospace;
+  line-height: 1.4;
+}
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="window">
+
+      
+      <div class="title-bar">
+        <div class="title-url"><span>🐭 Rodent's Farm</span></div>
+        <div class="title-buttons">
+          <button class="title-button">−</button>
+          <button class="title-button">×</button>
+          <button class="title-button">♥</button>
+        </div>
+      </div>
+
+      
+      <div class="main-content">
+        
+        <div class="sidebar">
+          <a href="index.html"><button class="sidebar-button" data-tooltip="Home"><img src="img/btn1.png" alt="Home"></button></a>
+          <a href="Farm.html"><button class="sidebar-button" data-tooltip="Farm"><img src="img/btn2.png" alt="Farm"></button></a>
+          <a href="Quiz.html"><button class="sidebar-button" data-tooltip="Quiz"><img src="img/btn3.png" alt="Quiz"></button></a>
+          <a href="#" onclick="location.reload(); return false;">
+          <button class="sidebar-button active" data-tooltip="R-news">
+            <img src="img/btn4.png" alt="R-news">
+          </button>
+          </a>
+        </div>
+
+        
+        <div class="main-area">
+        <div class="news-search-container" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <img src="img/news/search.png" alt="Search" class="search-logo">
+            <button id="go-btn"></button>
+            <img class="corner-gif" src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWtmZjdkOXdscmNlYnYxdzlmd2J0YmhscjYydGl6em84cXA2aWF6dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Up1hhxRjcCzWwcSW40/giphy.gif" alt="로딩쥐">
+        </div>
+
+        <div class="news-result" style="display: none;">
+        <div class="search-result-list">
+            <img src="img/news/num1.png" onclick="openNews(0)">
+            <img src="img/news/num2.png" onclick="openNews(1)">
+            <img src="img/news/num3.png" onclick="openNews(2)">
+            <img src="img/news/num4.png" onclick="openNews(3)">
+            <img src="img/news/num5.png" onclick="openNews(4)">
+        </div>
+        </div>
+        
+        <div class="news-page" style="display: none;">
+            <div class="back-button" onclick="goBack()"></div>
+            <div class="news-title">【 제목 자리 】</div>
+            <div class="news-content">
+                <div class="news-image">
+                <img src="" alt="뉴스 이미지">
+                <div class="image-caption"></div>
+                </div>
+                <div class="news-text">
+                본문 텍스트 자리
+                </div>
+            </div>
+            </div>
+
+        </div>
+
+      
+      <div class="status-bar">
+        <span>🐭 rodent's farm</span>
+        <span>last updated: just now</span>
+        <span>visitors: 1337</span>
+      </div>
+    </div>
+  </div>
+
+  
+  <div id="emoji-container" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;"></div>
+  <script>
+    document.addEventListener('click', function (e) {
+      const emojis = ['🧡','🐭','🧀'];
+      const container = document.getElementById('emoji-container');
+      for (let i = 0; i < 8; i++) {
+        const emoji = document.createElement('span');
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.position = 'absolute';
+        emoji.style.left = e.clientX + 'px';
+        emoji.style.top = e.clientY + 'px';
+        emoji.style.fontSize = '24px';
+        emoji.style.pointerEvents = 'none';
+        emoji.style.opacity = '1';
+        emoji.style.transition = 'all 0.8s ease-out';
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 80 + Math.random() * 50;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        requestAnimationFrame(() => {
+          emoji.style.transform = `translate(${x}px, ${y}px) scale(0.5)`;
+          emoji.style.opacity = '0';
+        });
+        container.appendChild(emoji);
+        setTimeout(() => emoji.remove(), 800);
+      }
+    });
+  </script>
+  <script>
+ document.getElementById('go-btn').addEventListener('click', function () {
+  document.querySelector('.news-search-container').style.display = 'none';
+  document.querySelector('.news-result').style.display = 'block';
+
+  
+  const main = document.querySelector('.main-area');
+  main.style.backgroundImage = "url('img/news/search2.png')";
+  main.style.backgroundSize = "cover";
+  main.style.backgroundPosition = "center";
+});
+</script>
+
+<script>
+const newsData = [
+  {
+    title: "기니피그가 돼지(Pig)인 이유",
+    text: "기니피그는 돼지와 전혀 다른<br> 설치류지만, 이름엔 'pig'이 붙었어요. 이는 울음소리가 돼지처럼 들리거나,<br> 통통한 외모가 작은 돼지를 연상시킨다는 점, 그리고 남미에서 식용으로 사육되던 역사 때문이라는 설이 있습니다.",
+    image: "img/news/img1.jpg",
+    caption: "⏶기니피그와 돼지의 비교 일러스트."
+  },
+  {
+    title: "역사상 사람을 가장 많이 죽인 동물은 쥐?!",
+    text: "1347년 크림반도에서 시작된 흑사병은 무역로를 따라 유럽 전역으로 퍼졌고,<br> 당시 인구의 최대 60%가 사망했어요. 원인을 알지 못했던 사람들은 이를<br> 신의 저주로 여겼고, 공포는 걷잡을 수 없이 커졌죠. 작은 쥐와 벼룩이<br> 전 세계적 비극을 불러온 이 사건은,<br> 감염병의 위협과 위생의 중요성을<br> 경고하고 있어요",
+    image: "img/news/img2.jpg",
+    caption: "⏶전염을 막기 위해 독특한 부리 모양 가면을 쓴 의사"
+  },
+  {
+    title: "비버와 카피바라는 사실 물고기",
+    text: "남아메리카 예수회 선교사들은 카피바라가 수영을 잘하고 물고기 맛이 난다며<br> 교황청에 보고했고, 결국 교황청은 <br>카피바라를 물고기로 공식 인정했어요. 덕분에 금욕 기간에도 먹을 수 있는<br> 동물이 되었습니다. 비버도 비슷한 <br>이유로 물고기라 주장했습니다.",
+    image: "img/news/img3.jpg",
+    caption: "⏶카피바라 교황청 물고기 인정 뉴스 기사 사진"
+  },
+  {
+    title: "쥐의 앞니는 평생 자란다?",
+    text: "쥐의 앞니는 평생 자라요! 그래서<br> 나무나 단단한 걸 계속 갉아야 해요.<br> 이걸 하지 않으면 앞니가 너무 길어져서 음식을 먹지 못하거나 다치기도<br> 한답니다. 그래서 쥐는 본능적으로 <br>갉는 행동을 계속해요!",
+    image: "img/news/img4.jpg",
+    caption: "⏶철분이 다량 함유된 단단한 ‘강철 이빨’을 가진 비버"
+  },
+  {
+    title: "만리장성도 맞먹는 비버의 댐",
+    text: "비버는 튼튼한 앞니로 나무를 갉아<br> 댐을 만드는 데 아주 능숙한 동물이에요. <br>캐나다에는 비버 가족들이 수천 그루의 나무를 모아 무려 850m나 되는 거대한 댐을 만들었는데, 이건 우주에서도<br> 보일 정도로 커다래요! 비버는 이렇게 <br>만든 댐 한가운데 자기 집도 짓고,<br> 주변에 습지도 만들어요. <br>그래서 다른 동물들에게도 좋은<br>  보금자리가 되죠.",
+    image: "img/news/img5.jpg",
+    caption: "⏶나뭇가지로 댐을 만드는 비버"
+  }
+];
+
+const viewedNews = [false, false, false, false, false];
+
+function openNews(index) {
+  const item = newsData[index];
+  document.querySelector('.news-title').textContent = `【 ${item.title} 】`;
+  document.querySelector('.news-image img').src = item.image;
+  document.querySelector('.news-text').innerHTML = item.text.replace(/\n/g, "<br>");
+  document.querySelector('.image-caption').textContent = item.caption;
+  viewedNews[index] = true;
+  
+  const buttons = document.querySelectorAll('.search-result-list img');
+    if (buttons[index]) {
+      buttons[index].src = `img/news/num${index + 1}-2.png`;
+    }
+
+  document.querySelector('.news-result').style.display = 'none';
+  document.querySelector('.news-page').style.display = 'block';
+  document.querySelector('.main-area').style.backgroundImage = "url('img/news/news.png')";
+}
+
+function goBack() {
+  document.querySelector('.news-page').style.display = 'none';
+  document.querySelector('.news-result').style.display = 'block';
+  document.querySelector('.main-area').style.backgroundImage = "url('img/news/search2.png')";
+}
+</script>
+
+</body>
+</html>

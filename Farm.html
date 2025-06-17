@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rodent's Farm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fastly.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
+  
+  <style>
+   @font-face {
+  font-family: 'DNFBitBitv2';
+  font-style: normal;
+  font-weight: 400;
+  
+  src: url('https://cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf') format('opentype');
+  font-display: swap;
+}
+    
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-family: 'Press Start 2P', 'Galmuri11','DNFBitBitv2', monospace; }
+    body {
+      background: #feffac url('img/pattern1.png') repeat;
+      background-size: 130px 65px;
+      animation: slidePattern 15s linear infinite;
+      min-height: 100vh;
+      padding: 96px 16px 32px;
+    }
+    @keyframes slidePattern {
+      from { background-position: 256px 0; }
+      to   { background-position: 0 256px; }
+    }
+
+    
+    .container {
+      width: 1080px; height: 855px;
+      margin: -25px auto 0; position: relative; z-index: 10;
+    }
+    .window {
+      position: relative;
+      width: 1080px; height: 855px;
+      background: url('img/frame2.png') no-repeat top left;
+      background-size: 1080px 855px;
+      overflow: hidden;
+    }
+
+    
+    .title-bar {
+      position: absolute; top: 8px; left: 8px; right: 23px; height: 60px;
+      display: flex; align-items: center; justify-content: flex-end;
+      background: transparent; z-index: 2;
+    }
+    .title-bar .title-url {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #FFF; border-radius: 18px;
+      padding: 6px 16px; border: 2px solid #000;
+      z-index: 5;
+    }
+    .title-bar .title-url span {
+      color: #C85C1A; font-size: 12px; line-height: 1;
+    }
+    .title-bar .title-buttons {
+      display: flex; gap: 8px; z-index: 10;
+      margin-right: 30px;
+    }
+    .title-bar .title-button {
+      width: 32px; height: 32px;
+      background: #FFF; border-radius: 50%;
+      border: 3px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      color: #C85C1A; font-size: 16px; cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .title-bar .title-button:hover {
+      background: #FDE1B4;
+    }
+
+  
+    .main-content {
+      position: absolute; top: 75px; left: 0; right: 0; height: 713px;
+      display: flex; z-index: 1;
+    }
+
+    
+    .sidebar {
+      position: absolute; top: 0; left: 8px;
+      width: 105px; height: 713px;
+      display: flex; flex-direction: column; gap: 5px;
+      z-index: 2;
+    }
+    .sidebar a { display: flex; justify-content: center; text-decoration: none; }
+    .sidebar a button { margin: 5px 0; }
+    .sidebar-button {
+      position: relative; width: 80px; height: 80px;
+      background: transparent url('img/btn_before.png') no-repeat center;
+      background-size: 80px 80px; border: none; cursor: pointer;
+      transition: background-image 0.1s; z-index: 3;
+    }
+    .sidebar-button:hover { background-image: url('img/btn_hover.png'); }
+    .sidebar-button.active { background-image: url('img/btn_after.png'); }
+    .sidebar-button::before {
+      content: "";
+      position: absolute; top: 4px; left: calc(100% + 4px);
+      width: 120px; height: 60px;
+      background: url('img/tool.png') no-repeat center;
+      background-size: contain;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 10;
+    }
+    .sidebar-button::after {
+      content: attr(data-tooltip);
+      position: absolute; top: 20px; left: calc(100% + 4px);
+      width: 120px; text-align: center;
+      font-size: 14px; color: #000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 11;
+      font-family: 'Galmuri11', monospace;
+      font-weight: 700;
+    }
+    .sidebar-button:hover::before,
+    .sidebar-button:hover::after { opacity: 1; }
+    .sidebar-button img {
+      position: absolute; top: 50%; left: 48%;
+      width: 48px; height: 48px;
+      transform: translate(-50%, -50%);
+      pointer-events: none; transition: left 0.1s;
+    }
+    .sidebar-button.active img { left: 50%; }
+
+    
+    .main-area {
+      position: absolute; top: 0; left: 120px;
+      width: 938px; height: 713px;
+      background: url('img/farm/farm.png') no-repeat center/cover;
+      padding: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      z-index: 1;
+    }
+    @keyframes pulse-scale {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.05);
+      }
+    }
+    
+    .explore-button {
+      position: relative; margin-bottom: 40px;
+    }
+    .explore-button img {
+      width: 197px; height: 156px; display: block;
+    }
+    .explore-button  {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translate(-50%);
+      animation: pulse-scale 1.5s ease-in-out infinite;
+    }
+
+    
+    .status-bar {
+      position: absolute; top: 793px; left: 45px;
+      width: 990px; height: 38px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: #C85C1A; background: transparent; z-index: 2;
+    }
+    .status-bar span {
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #000;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    
+    .animal, #user-character {
+      position: absolute; user-select: none; pointer-events: none;
+    }
+    .animal { z-index: 2; }
+    #user-character { z-index: 3; }
+
+   
+    .dust {
+      position: absolute; width: 32px; height: auto;
+      pointer-events: none;
+      animation: fadeDust 0.5s ease-out forwards;
+      z-index: 1;
+    }
+    @keyframes fadeDust {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(-10px) scale(1.2); }
+    }
+
+    
+    #tooltip {
+      position: absolute; display: none;
+      background: url('img/tool2.png') no-repeat center;
+      background-size: contain;
+      width: 120px; height: 60px;
+      pointer-events: auto; z-index: 5;
+    }
+    #tooltip button {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -80%);
+      background: none; border: none;
+      color: #000; font-size: 14px;
+      cursor: pointer; white-space: nowrap;
+      font-family: 'Galmuri11', monospace;
+    }
+
+    
+    #mouse-controls {
+      position: absolute; bottom: 20px; left: 20px;
+      width: 208px; height: 145px;
+      z-index: 4; display: none;
+    }
+    #keyboard-img {
+      width: 100%; height: 100%;
+      display: block; user-select: none; pointer-events: none;
+    }
+    .click-zone {
+      position: absolute; background: rgba(0,0,0,0); cursor: pointer;
+    }
+    #mouse-controls .arrow-up    { top: 30px; left: 84px;  width: 40px; height: 40px; }
+    #mouse-controls .arrow-left  { top: 75px; left: 44px;  width: 35px; height: 40px; }
+    #mouse-controls .arrow-down  { top: 75px; left: 84px;  width: 40px; height: 40px; }
+    #mouse-controls .arrow-right { top: 75px; left: 129px; width: 35px; height: 40px; }
+
+    
+    .detail-area {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('img/farm/back.png') no-repeat center/cover;
+      display: none;  
+      z-index: 4;
+    }
+    #back-btn {
+      position: absolute; top: 20px; left: 20px;
+      background: #FFF; border: 2px solid #000;
+      border-radius: 4px; padding: 6px 12px;
+      font-size: 14px; color: #000; cursor: pointer;
+      z-index: 5; transition: background-color 0.2s;
+    }
+    #back-btn:hover { background: #f0f0f0; }
+
+    
+    #animal-img {
+      position: absolute; top: 200px;
+      left: 50%; transform: translateX(-50%);
+      width: 177px; height: auto; z-index: 5;
+    }
+
+    
+    #name-bar {
+      position: absolute; top: 370px; left: 30px;
+      width: 250px; height: 58px;
+      background: url('img/farm/name.png') no-repeat center;
+      background-size: 250px 58px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #000; z-index: 5;
+    }
+    
+    #glass-btn {
+      position: absolute; top: 370px; left: 300px;
+      width: 50px; height: 50px;
+      background: url('img/farm/glasses.png') no-repeat center;
+      background-size: contain;
+      border: none; cursor: pointer;
+      z-index: 5;
+    }
+
+   
+    #dialogue-box {
+      position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 938px; height: 271px;
+      background: url('img/farm/con.png') no-repeat center;
+      background-size: contain;
+      display: flex; align-items: flex-start;
+      padding: 50px; z-index: 5;
+    }
+    #dialogue-box p {
+      font-size: 18px; color: #000; line-height: 1.3; user-select: none;
+    }
+
+    
+    #hint-text {
+      position: absolute;
+      animation: floatUpDown 2s ease-in-out infinite;
+      z-index: 4;
+      width: 300px;
+      height: auto;
+    }
+    @keyframes floatUpDown {
+      0%   { transform: translate(-50%, 0); }
+      50%  { transform: translate(-50%, -10px); }
+      100% { transform: translate(-50%, 0); }
+    }
+
+    
+    #photo-modal {
+      position: absolute;         
+      top: 0; left: 0;            
+      width: 100%; height: 100%;  
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;               
+    }
+    #modal-content {
+      position: relative;
+      background: white;
+      padding: 10px;
+      border: 2px solid #000;
+      border-radius: 8px;
+    }
+    #modal-content img {
+      max-width: 700px;
+      max-height: 700px;
+      display: block;
+    }
+    #close-btn {
+      position: absolute;
+      top: -10px; right: -10px;
+      width: 24px; height: 24px;
+      background: #fff;
+      border: 2px solid #000;
+      border-radius: 50%;
+      font-size: 16px; font-weight: bold;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+  @keyframes blink-slow {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+    }
+    #hint-proximity {
+    position: absolute;
+    width: 150px;        
+    height: auto;
+    animation: blink-slow 2s ease-in-out infinite;
+    z-index: 4;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="window">
+      
+      <div class="title-bar">
+        <div class="title-url"><span>🐭 Rodent's Farm</span></div>
+        <div class="title-buttons">
+          <button class="title-button">−</button>
+          <button class="title-button">×</button>
+          <button class="title-button">♥</button>
+        </div>
+      </div>
+
+      
+      <div class="main-content">
+        
+        <div class="sidebar">
+          <a href="index.html">
+            <button class="sidebar-button" data-tooltip="Home">
+              <img src="img/btn1.png" alt="Home">
+            </button>
+          </a>
+          <a href="#" onclick="location.reload(); return false;">
+          <button class="sidebar-button active" data-tooltip="Farm">
+            <img src="img/btn2.png" alt="Farm">
+          </button>
+          </a>
+          <a href="Quiz.html">
+            <button class="sidebar-button" data-tooltip="Quiz">
+              <img src="img/btn3.png" alt="Quiz">
+            </button>
+          </a>
+          <a href="R-news.html">
+            <button class="sidebar-button" data-tooltip="R-news">
+              <img src="img/btn4.png" alt="R-news">
+            </button>
+          </a>
+        </div>
+
+        
+        <div class="main-area" id="main-area">
+          
+          <div class="explore-button" id="explore-container">
+            <a href="#" id="start-explore">
+              <img src="img/farm/start.png" alt="농장 탐험하기">
+              
+            </a>
+          </div>
+
+          
+          <div id="tooltip">
+            <button id="tooltip-btn">이름</button>
+          </div>
+
+          
+          <div id="mouse-controls">
+            <img src="img/farm/keyboard.png" alt="키보드 컨트롤" id="keyboard-img">
+            <div class="click-zone arrow-up"    data-dir="up"></div>
+            <div class="click-zone arrow-left"  data-dir="left"></div>
+            <div class="click-zone arrow-down"  data-dir="down"></div>
+            <div class="click-zone arrow-right" data-dir="right"></div>
+          </div>
+
+          
+          <div class="detail-area" id="detail-area">
+            
+          </div>
+        
+
+          
+          <div id="photo-modal">
+            <div id="modal-content">
+              <span id="close-btn">&times;</span>
+              <img id="modal-img" src="" alt="Animal Photo">
+            </div>
+          </div>
+        </div>
+      </div>
+
+     
+      <div class="status-bar">
+        <span>🐭 rodent's farm</span>
+        <span>last updated: just now</span>
+        <span>visitors: 1337</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const mainArea    = document.getElementById('main-area');
+    const exploreCont = document.getElementById('explore-container');
+    const tooltip     = document.getElementById('tooltip');
+    const tooltipBtn  = document.getElementById('tooltip-btn');
+    const mouseCtrls  = document.getElementById('mouse-controls');
+    const detailArea  = document.getElementById('detail-area');
+    const photoModal  = document.getElementById('photo-modal');
+    const modalImg    = document.getElementById('modal-img');
+    const closeBtn    = document.getElementById('close-btn');
+
+    
+    const animalData = [
+      {
+        src: 'img/farm/beaver.png',   x: 100, y: 350, w: 100, h: 'auto',
+        name: '비버',
+        detailImg: 'img/farm/beaver2.png',
+        dialogue: '🦫헤이~ 나는 비버야!🪵 나무를 갉갉 갉아댈 때가 제일 행복해! 🚤💧북아메리카 습지의 시원한 강가에 나만의 멋진 댐을 지으며 살지! 🌿🌳나무 껍질이랑 연한 가지는 내 최애 간식이야~  👑건축왕 비버! 집 리모델링 도와줄 사람?😉🔨',
+        photo: 'img/farm/beaver_photo.jpg'
+      },
+      {
+        src: 'img/farm/capy.png',     x: 450, y: 200, w: 150, h: 'auto',
+        name: '카피바라',
+        detailImg: 'img/farm/capy2.png',
+        dialogue: '안~녕~ 나는… 카피바라야… ☀따뜻한 남아메리카 강가에서… 느긋느긋~ 💦물에 떠 있는 걸… 정말 좋아해… 🌿 움직이는 건 귀찮아.. 평화롭게 사는 게 최고야… ☁️💕 부들부들한 풀, 시원한 수생식물, 🍉🥭달달한 과일도 좋아하지🍊🫐.. 그냥 다 같이… 눕자… 😌🛌 너도 여기 와서… 같이 둥실둥실… 떠볼래…? 🌊✨',
+        photo: 'img/farm/capy_photo.jpg'
+      },
+      {
+        src: 'img/farm/chin.png',     x: 600, y: 550, w: 100, h: 'auto',
+        name: '친칠라',
+        detailImg: 'img/farm/chin2.png',
+        dialogue: '뽀송뽀송~ 나는 친칠라야!🐭 세상에서 제일 보송보송한 털을 가졌지~✨ 물? 그런 걸로는 못 씻어~ 🏖 나는 모래로 목욕하는 깔끔쟁이야! 🛁🌫️ 추운 고산 지대❄️, 바위 틈에서 쏙쏙 숨어 지내는 게 특기! 🪨🏔️ 너무 가까이 오면 깜짝 놀라서 사르르 사라질지도 몰라~ 🙈 나랑 같이 조용히… 모래놀이 해볼래? 사르르~🌪️🌪️',
+        photo: 'img/farm/chin_photo.jpg'
+      },
+      {
+        src: 'img/farm/guinea.png',   x: 90,  y: 100, w: 100, h: 'auto',
+        name: '기니피그',
+        detailImg: 'img/farm/guinea2.png', // 177×181
+        dialogue: '안녕! 나는 기니피그야!🐹🐹 꾸잉 꾸잉잉 난 남아메리카 안데스 산맥의 산기슭 ⛰🏞 초원에서 태어났어. 주로 🌳풀숲사이🌳에 둥지를 틀고, 🐹🐭친구들과 함께 무리지어 살아.내가 좋아하는 음식은 🌱달콤한 건초와 신선한 상추, 그리고 당근 한 조각이야!🥕🥕 꾸잉꾸잉, 너도 맛있는 풀이나 야채가 있으면 꼭 나눠줘~😎',
+        photo: 'img/farm/guinea_photo.jpg'
+      },
+      {
+        src: 'img/farm/harvest.png',  x: 780, y: 90,  w: 100, h: 'auto',
+        name: '멧밭쥐',
+        detailImg: 'img/farm/harvest2.png',
+        dialogue: '피슝!💨 🌾들판을 가르는 질주왕, 멧밭쥐 등장! 🐭들판이랑 논밭 사이를 휙휙~ 누비는 게 내 특기지! 나는 작지만 누구보다 빠르고 용감하다고~ 💨💪 풀숲 아래, 흙 속에 나만의 굴을 파고 살아~ 🕳️🏡  낮엔 콩잎 사이에서 숨바꼭질, 밤엔 땅속 둥지에서 쿨쿨~ 🌙🛌  씨앗, 곡물 같은 고소~한 게 최고야!🌰🌽  내가 크기는 작아도 마음은 한 들판만큼 넓다고~🌱',
+        photo: 'img/farm/harvest_photo.jpg'
+      },
+      {
+        src: 'img/farm/squ.png',      x: 800, y: 400, w: 100, h: 'auto',
+        name: '다람쥐',
+        detailImg: 'img/farm/squ2.png',
+        dialogue: '🐿후다닥! 너 도토리 봤어?!👀🔍 아무래도 도토리 수집은 다람쥐의 전문이지!🌰 숲 속을 빠르게 슝슝~ 나무 타기 달인이야! 🌳🏃‍♂️ 볼에 도토리 가득 넣고 다니는 건 비밀이야…🙊 겨울엔❄️ 저장해둔 간식 먹으면서 뒹굴뒹굴하는 게 취미야~💤',
+        photo: 'img/farm/squ_photo.jpg'
+
+      }
+    ];
+
+    let inExplore = false;
+    let userImg, maWidth, maHeight;
+    let lastPos = { x: 0, y: 0 };
+    let hintActive = false; 
+
+    
+    closeBtn.addEventListener('click', () => {
+      photoModal.style.display = 'none';
+    });
+
+   
+    document.getElementById('start-explore').addEventListener('click', e => {
+      e.preventDefault();
+      startExplore();
+    });
+
+    function startExplore() {
+      inExplore = true;
+
+      
+      mainArea.style.backgroundImage = "url('img/farm/farm2.png')";
+      mainArea.style.backgroundSize  = "cover";
+      mainArea.style.backgroundPosition = "center";
+
+      
+      exploreCont.style.display = 'none';
+
+      
+      mouseCtrls.style.display = 'block';
+
+      
+      const hint = document.createElement('img');
+      hint.id = 'hint-text';
+      hint.src = 'img/farm/hint1.png';       
+      hint.alt = '힌트 이미지';
+      mainArea.appendChild(hint);
+      hintActive = true;
+
+      
+      if (!document.querySelector('.animal')) {
+        animalData.forEach(item => {
+          const img = document.createElement('img');
+          img.src = item.src;
+          img.alt = item.name;
+          img.classList.add('animal');
+          img.dataset.name      = item.name;
+          img.dataset.detailimg = item.detailImg;
+          img.dataset.dialogue  = item.dialogue;
+          img.dataset.photo     = item.photo;
+
+          img.style.left        = item.x + 'px';
+          img.style.top         = item.y + 'px';
+          img.style.width       = item.w + 'px';
+          img.style.height      = item.h !== 'auto' ? item.h + 'px' : 'auto';
+          img.style.display     = 'none';
+          mainArea.appendChild(img);
+        });
+      }
+
+      if (!document.getElementById('user-character')) {
+        userImg = document.createElement('img');
+        userImg.id = 'user-character';
+        userImg.src = 'img/farm/user.png';
+        userImg.alt = 'User';
+        userImg.style.width  = '90px';
+        userImg.style.height = 'auto';
+        maWidth  = mainArea.clientWidth;
+        maHeight = mainArea.clientHeight;
+        userImg.onload = () => {
+          let posX = (maWidth - userImg.clientWidth) / 2;
+          let posY = maHeight - userImg.clientHeight - 60;
+          userImg.style.left = posX + 'px';
+          userImg.style.top  = posY + 'px';
+          lastPos.x = posX;
+          lastPos.y = posY;
+
+          
+          hint.style.left     = '50%';
+          hint.style.transform = 'translateX(-50%)';
+          hint.style.top      = (posY - 95) + 'px';
+        };
+        userImg.style.display = 'none';
+        mainArea.appendChild(userImg);
+      } else {
+        userImg = document.getElementById('user-character');
+      }
+
+     
+      document.querySelectorAll('.animal').forEach(el => el.style.display = 'block');
+      userImg.style.display = 'block';
+
+      
+      tooltip.style.display = 'none';
+
+     
+      document.addEventListener('keydown', handleKeyDownExplore);
+
+
+
+
+      
+      if (!mouseCtrls.dataset.initialized) {
+        document.querySelectorAll('#mouse-controls .click-zone').forEach(zone => {
+          zone.addEventListener('click', () => {
+            const dir = zone.getAttribute('data-dir');
+            moveCharacter(dir);
+            checkProximity();
+          });
+        });
+        mouseCtrls.dataset.initialized = 'true';
+      }
+    }
+
+    
+    function handleKeyDownExplore(e) {
+      if (!inExplore) return;
+      switch(e.key) {
+        case 'ArrowLeft':
+          moveCharacter('left'); e.preventDefault(); break;
+        case 'ArrowRight':
+          moveCharacter('right'); e.preventDefault(); break;
+        case 'ArrowUp':
+          moveCharacter('up'); e.preventDefault(); break;
+        case 'ArrowDown':
+          moveCharacter('down'); e.preventDefault(); break;
+      }
+      checkProximity();
+    }
+
+    
+    function showProximityHint() {
+      let hint2 = document.getElementById('hint-proximity');
+      if (!hint2) {
+        hint2 = document.createElement('img');
+        hint2.id = 'hint-proximity';
+        hint2.src = 'img/farm/hint2.png';
+        hint2.alt = '힌트2';
+        mainArea.appendChild(hint2);
+      }
+      const charX = parseInt(userImg.style.left, 10);
+      const charY = parseInt(userImg.style.top, 10);
+      hint2.style.left = (charX + userImg.clientWidth / 2 - 80) + 'px';
+      hint2.style.top  = (charY - 90) + 'px';
+    }
+
+    
+    function moveCharacter(direction) {
+      const step = 10;
+      let posX = parseInt(userImg.style.left, 10);
+      let posY = parseInt(userImg.style.top, 10);
+      const maxX = maWidth - userImg.clientWidth;
+      const maxY = maHeight - userImg.clientHeight;
+
+      switch(direction) {
+        case 'left':  posX = Math.max(0, posX - step); break;
+        case 'right': posX = Math.min(maxX, posX + step); break;
+        case 'up':    posY = Math.max(0, posY - step); break;
+        case 'down':  posY = Math.min(maxY, posY + step); break;
+      }
+
+      userImg.style.left = posX + 'px';
+      userImg.style.top  = posY + 'px';
+      lastPos.x = posX;
+      lastPos.y = posY;
+
+     
+      if (hintActive) {
+        const hint = document.getElementById('hint-text');
+        if (hint) hint.style.display = 'none';
+        hintActive = false;
+      }
+
+      
+      const now = Date.now();
+      if (!moveCharacter.lastDustTime) moveCharacter.lastDustTime = 0;
+      const dustInterval = 200;
+      if (now - moveCharacter.lastDustTime > dustInterval) {
+        const currentW = userImg.clientWidth;
+        const currentH = userImg.clientHeight;
+        const dustW = 32, dustH = 32;
+        const dustX = posX + (currentW / 2) - (dustW / 2);
+        const dustY = posY + currentH - (dustH / 2);
+        createDust(dustX, dustY);
+        moveCharacter.lastDustTime = now;
+      }
+    }
+
+    function createDust(x, y) {
+      const dust = document.createElement('img');
+      dust.src = 'img/farm/dust.png';
+      dust.classList.add('dust');
+      dust.style.left = x + 'px';
+      dust.style.top  = y + 'px';
+      mainArea.appendChild(dust);
+      setTimeout(() => dust.remove(), 500);
+    }
+
+    
+    function distance(x1, y1, x2, y2) {
+      return Math.hypot(x2 - x1, y2 - y1);
+    }
+
+  
+   function checkProximity() {
+  const ux = parseInt(userImg.style.left, 10) + userImg.clientWidth / 2;
+  const uy = parseInt(userImg.style.top, 10)  + userImg.clientHeight / 2;
+  let found = false;
+
+  document.querySelectorAll('.animal').forEach(animalImg => {
+    const ax = parseInt(animalImg.style.left, 10) + animalImg.clientWidth / 2;
+    const ay = parseInt(animalImg.style.top, 10)  + animalImg.clientHeight / 2;
+    if (distance(ux, uy, ax, ay) < 100) {
+      showTooltip(animalImg);
+      showProximityHint();
+      found = true;
+    }
+  });
+
+  if (!found) {
+    hideTooltip();                     
+    const hint2 = document.getElementById('hint-proximity');
+    if (hint2) hint2.remove();         
+  }
+}
+
+    
+    function showTooltip(animalImg) {
+      const nameText   = animalImg.dataset.name;
+      const detailImg  = animalImg.dataset.detailimg;
+      const dialogue   = animalImg.dataset.dialogue;
+      
+      const photoSrc   = animalImg.dataset.photo;
+
+      tooltipBtn.textContent = nameText;
+      tooltipBtn.onclick = () => enterDetail(detailImg, nameText, dialogue, photoSrc);
+
+    
+      tooltip.style.display = 'block';
+      tooltip.style.visibility = 'hidden';
+      const ttW = tooltip.clientWidth;
+      const ttH = tooltip.clientHeight;
+      tooltip.style.visibility = 'visible';
+
+      
+      const aX = parseInt(animalImg.style.left, 10);
+      const aY = parseInt(animalImg.style.top, 10);
+
+      const leftPos = aX + (animalImg.clientWidth / 2) - (ttW / 2);
+      const topPos  = aY - ttH - 5;
+
+      tooltip.style.left    = leftPos + 'px';
+      tooltip.style.top     = topPos + 'px';
+      tooltip.style.display = 'block';
+
+      
+      document.addEventListener('keydown', onEnterPress);
+      function onEnterPress(e) {
+        if (e.key === 'Enter') {
+          enterDetail(detailImg, nameText, dialogue, photoSrc);
+        }
+      }
+      tooltip._cleanup = () => {
+        tooltip.style.display = 'none';
+        document.removeEventListener('keydown', onEnterPress);
+        delete tooltip._cleanup;
+      };
+    }
+
+    function hideTooltip() {
+      if (tooltip._cleanup) tooltip._cleanup();
+    }
+
+   
+    function enterDetail(imgSrc, nameText, dialogueText, photoSrc) {
+      inExplore = false;
+      tooltip.style.display = 'none';
+      const h2 = document.getElementById('hint-proximity');
+      if (h2) h2.remove();
+
+      
+      document.removeEventListener('keydown', handleKeyDownExplore);
+
+      
+      document.querySelectorAll('.animal').forEach(el => el.style.display = 'none');
+      userImg.style.display = 'none';
+      tooltip.style.display = 'none';
+      mouseCtrls.style.display = 'none';
+
+     
+      detailArea.style.display = 'block';
+      detailArea.innerHTML = ''; 
+
+     
+      const backBtn = document.createElement('button');
+      backBtn.id = 'back-btn';
+      backBtn.textContent = '뒤로가기';
+      backBtn.onclick = () => {
+        detailArea.style.display = 'none';
+        detailArea.innerHTML = '';
+        inExplore = true;
+        document.querySelectorAll('.animal').forEach(el => el.style.display = 'block');
+        userImg.style.display = 'block';
+        userImg.style.left = lastPos.x + 'px';
+        userImg.style.top  = lastPos.y + 'px';
+        mouseCtrls.style.display = 'block';
+        document.addEventListener('keydown', handleKeyDownExplore);
+      };
+      detailArea.appendChild(backBtn);
+
+     
+      const aniImg = document.createElement('img');
+      aniImg.id = 'animal-img';
+      aniImg.src = imgSrc;
+      aniImg.alt = nameText;
+
+      if (nameText === '카피바라') {
+        aniImg.style.width  = '250px';  
+        aniImg.style.height = 'auto';
+      } else {
+        aniImg.style.width  = '177px';  
+        aniImg.style.height = 'auto';
+      }
+
+
+      detailArea.appendChild(aniImg);
+
+      
+      const nameBar = document.createElement('div');
+      nameBar.id = 'name-bar';
+      nameBar.textContent = nameText;
+      detailArea.appendChild(nameBar);
+
+      
+      const glassBtn = document.createElement('button');
+      glassBtn.id = 'glass-btn';
+      glassBtn.onclick = () => {
+        modalImg.src = photoSrc;
+        photoModal.style.display = 'flex';
+      };
+      detailArea.appendChild(glassBtn);
+
+      
+      const dialogBox = document.createElement('div');
+      dialogBox.id = 'dialogue-box';
+      const p = document.createElement('p');
+      p.textContent = dialogueText;
+      dialogBox.appendChild(p);
+      detailArea.appendChild(dialogBox);
+    }
+  </script>
+  
+  <div id="emoji-container" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;"></div>
+  <script>
+    
+    document.addEventListener('click', function (e) {
+      const emojis = ['🧡','🐭','🧀'];
+      const container = document.getElementById('emoji-container');
+      for (let i = 0; i < 8; i++) {
+        const emoji = document.createElement('span');
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.position = 'absolute';
+        emoji.style.left = e.clientX + 'px';
+        emoji.style.top = e.clientY + 'px';
+        emoji.style.fontSize = '24px';
+        emoji.style.pointerEvents = 'none';
+        emoji.style.opacity = '1';
+        emoji.style.transition = 'all 0.8s ease-out';
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 80 + Math.random() * 50;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        requestAnimationFrame(() => {
+          emoji.style.transform = `translate(${x}px, ${y}px) scale(0.5)`;
+          emoji.style.opacity = '0';
+        });
+        container.appendChild(emoji);
+        setTimeout(() => emoji.remove(), 800);
+      }
+    });
+  </script>
+</body>
+</html>

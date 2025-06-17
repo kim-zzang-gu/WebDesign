@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rodent's Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fastly.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-family: 'Press Start 2P', 'Galmuri11', monospace; }
+    body {
+      background: #feffac url('img/pattern1.png') repeat;
+      background-size: 130px 65px;
+      animation: slidePattern 15s linear infinite;
+      min-height: 100vh;
+      padding: 96px 16px 32px;
+    }
+    @keyframes slidePattern {
+      from { background-position: 256px 0; }
+      to   { background-position: 0 256px; }
+    }
+
+    .container {
+      width: 1080px; height: 855px;
+      margin: -25px auto 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .window {
+      position: relative;
+      width: 1080px;
+      height: 855px;
+      background: url('img/frame2.png') no-repeat top left;
+      background-size: 1080px 855px;
+      overflow: hidden;
+    }
+
+    .title-bar {
+      position: absolute; top: 8px; left: 8px; right: 23px; height: 60px;
+      display: flex; align-items: center; justify-content: flex-end;
+      background: transparent; z-index: 2;
+    }
+    .title-bar .title-url {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #FFF;
+      border-radius: 18px;
+      padding: 6px 16px;
+      border: 2px solid #000;
+      z-index: 5;
+    }
+    .title-bar .title-url span {
+      color: #C85C1A;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .title-bar .title-buttons {
+      display: flex; gap: 8px; z-index: 10;
+      margin-right: 30px;
+    }
+    .title-bar .title-button {
+      width: 32px; height: 32px;
+      background: #FFF;
+      border-radius: 50%;
+      border: 3px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      color: #C85C1A;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .title-bar .title-button:hover {
+      background: #FDE1B4;
+    }
+
+    .main-content {
+      position: absolute; top: 75px; left: 0; right: 0; height: 713px;
+      display: flex; z-index: 1;
+    }
+
+    .sidebar {
+      position: absolute; top: 0px; left: 8px;
+      width: 105px; height: 713px;
+      background: transparent;
+      display: flex; flex-direction: column; gap: 5px;
+      z-index: 2;
+    }
+    .sidebar a {
+      display: flex;
+      justify-content: center;
+      text-decoration: none;
+    }
+    .sidebar a button {
+      margin: 5px 0;
+    }
+
+    .sidebar-button {
+      position: relative;
+      width: 80px; height: 80px;
+      background: transparent url('img/btn_before.png') no-repeat center;
+      background-size: 80px 80px;
+      border: none;
+      cursor: pointer;
+      transition: background-image 0.1s;
+      z-index: 3;
+    }
+    .sidebar-button:hover {
+      background-image: url('img/btn_hover.png');
+    }
+    .sidebar-button.active {
+      background-image: url('img/btn_after.png');
+    }
+    .sidebar-button::before {
+      content: "";
+      position: absolute;
+      top: 4px; left: calc(100% + 4px);
+      width: 120px; height: 60px;
+      background: url('img/tool.png') no-repeat center;
+      background-size: contain;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 10;
+    }
+    .sidebar-button::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 20px; left: calc(100% + 4px);
+      width: 120px; text-align: center;
+      font-size: 14px;
+      color: #000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 11;
+      font-family: 'Galmuri11', monospace;
+      font-weight: 700;
+    }
+    .sidebar-button:hover::before,
+    .sidebar-button:hover::after { opacity: 1; }
+    .sidebar-button img {
+      position: absolute;
+      top: 50%; left: 48%;
+      width: 48px; height: 48px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: left 0.1s;
+    }
+    .sidebar-button.active img { left: 50%; }
+
+    .main-area {
+      position: absolute; top: 0; left: 120px;
+      width: 938px; height: 713px;
+      background: transparent;
+      padding: 0;
+      overflow: auto;
+      display: block;
+      z-index: 1;
+    }
+
+
+    .status-bar {
+      position: absolute;
+      top: 793px; left: 45px;
+      width: 990px; height: 38px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: #C85C1A; background: transparent; z-index: 2;
+    }
+    .status-bar span {
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #000;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    /*────────── 이하 기존 퀴즈 코드 스타일 ──────────*/
+        .window-container {
+      z-index: 10; 
+      width: 938px; height: 713px;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    
+    .quiz-area { margin: 9px 5px ; flex: 1; display: flex; flex-direction: column; height: calc(100% - 59px); box-sizing: border-box; }
+    .chat-box { flex: 1; overflow-y: auto; padding: 16px; margin-bottom: 10px; background: transparent; position: relative; }
+    .message.bot { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+    .message.bot .profile { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+    .message.bot .ham { margin: 0; }
+    .progress-container { width: 100%; background: #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .progress-bar { width: 0%; height: 20px; background: #5a9be7; transition: width 0.1s linear; }
+    .chat-box .message.loader { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; margin: 0; padding: 0; }
+    .loader-text {  font-family: 'Galmuri9', monospace; font-weight: normal; font-size: 18px; display: flex; align-items: center; gap: 10px; justify-content: center; }
+    .install-gif { width: 36px; height: auto; image-rendering: pixelated; }
+    .message { margin-bottom: 16px; }
+    .ham { background: #FFF79E; color: #000; padding: 12px 16px; border-radius: 14px; display: inline-block; max-width: 70%; font-family: 'Galmuri9', monospace; font-size: 18px; line-height: 1.4; word-break: break-word; }
+    .user { text-align: right; }
+    .user .msg { background: #CFEAFF; color: #000; padding: 12px 16px; border-radius: 14px; display: inline-block; max-width: 70%; margin-left: auto;  font-family: 'Galmuri9', monospace;font-size: 18px; line-height: 1.4; word-break: break-word; }
+    .choices-inline { display: flex; flex-direction: column; margin-top: 8px; }
+    .choices-inline button { width: 220px;
+  text-align: center;
+  margin: 4px auto; background: #FFBD71; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.3s ease;  font-family: 'Galmuri9', monospace; font-weight: 700; font-size: 16px; }
+    .choices-inline button:hover { background: #fbac3d; }
+    .input-bar { display: flex; padding: 10px; background: transparent; }
+    .input-bar input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: 'Galmuri9', monospace;  font-size: 16px; }
+    .input-bar button { padding: 8px 12px; background: #FFBD71; border: 2px solid black; border-radius: 6px; margin-left: 8px; cursor: pointer; transition: background 0.3s ease; font-family: 'Galmuri9', monospace; }
+    .input-bar button:hover { background: #fbac3d; }
+    .hidden { display: none; }
+    .chat-box .message.start { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; margin: 0; padding: 0; background: none; }
+    .chat-box .message.start h2 { margin: -10px 0 5px; font-size: 40px; color: #000; }
+    .chat-box .message.start .start-img {  width: 220px; height: 220px; border-radius: 50%; background: #FEC66A; position: relative;
+  top: 20px;}
+    .chat-box .message.start button { padding: 14px 50px; background: #FFBD71; border: solid 3px balck; border-radius: 30px; font-family: 'Galmuri9', monospace; font-weight: 700; font-size: 24px; cursor: pointer; transition: background 0.3s; }
+    .chat-box .message.start button:hover { background: #fbac3d; }
+    .message.start p { font-size: 20px; line-height: 1.6; font-family: 'Galmuri9', sans-serif; font-weight: 600; }
+    @keyframes bounce-bubble { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .chat-bubble { position: absolute; top: 10px; left: 85%; width: 350px; animation: bounce-bubble 2.2s infinite ease-in-out; z-index: 20; }
+    .chat-bubble img { width: 100%; display: block; }
+ .start-img-wrapper {
+  width: 200px;
+  height: 200px;
+  background: #FEC66A;
+  border-radius: 50%;
+  overflow: hidden;         /* 이미지가 밖으로 나가지 않게 */
+  position: relative;
+}
+
+.ham-gif {
+  width: 220px;             /* ← 여기서 크기 조절! */
+  position: absolute;
+  bottom: -5px;            /* ↓ 아래로 조금 내리기 */
+  left: 50%;
+  transform: translateX(-50%);
+}
+.warning-icon {
+  width: 46px;
+  position: absolute;
+  top: 5px;  /* ← 높이 조정 */
+  left: 50%;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+}
+    /* ─── 카드 뽑기 모달 ─── */
+   
+    .modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 500px;
+  background: #fff;
+  border-radius: 12px;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  overflow: hidden;
+  z-index: 30; /* main-area 위로 */
+}
+    .close-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: none; border: none;
+      font-size: 24px; cursor: pointer; z-index: 10;
+    }
+    .card-container {
+      position: relative; width: 100%; height: 100%; perspective: 1000px; margin-top: -45px;
+    }
+    .card {
+      position: absolute; left: 50%; top: 50%;
+      width: 160px; height: 230px;
+      transform-origin: bottom center; transform-style: preserve-3d;
+      transform: translateX(calc(-50% + var(--x))) translateY(calc(-50% + var(--y)))
+                 rotateZ(var(--deg)) rotateY(var(--flip,0deg)) scale(var(--scale,1));
+      transition: transform 0.4s ease, opacity 0.3s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateX(calc(-50% + var(--x)))
+                 translateY(calc(-50% + var(--y) - 20px))
+                 rotateZ(var(--deg)) scale(1.05) rotateY(var(--flip,0deg));
+    }
+    .card-face {
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; border-radius: 8px;
+      background-size: cover; background-position: center;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)) drop-shadow(0 1px 3px rgba(0,0,0,0.08));
+    }
+    .card-face.back { transform: rotateY(0deg); background-image: url('img/card/card_back.png'); }
+    .card-face.front { transform: rotateY(180deg); }
+    .card.flipped { --flip: 180deg; }
+    .card:nth-child(1) { --deg:-20deg; --x:-250px; --y:50px; }
+    .card:nth-child(2) { --deg:-15deg; --x:-150px; --y:20px; }
+    .card:nth-child(3) { --deg: -5deg; --x: -50px; --y: 0px; }
+    .card:nth-child(4) { --deg:  5deg; --x:  50px; --y: 0px; }
+    .card:nth-child(5) { --deg: 15deg; --x: 150px; --y:20px; }
+    .card:nth-child(6) { --deg: 20deg; --x: 250px; --y:50px; }
+    .card:nth-child(1) .card-face.front { background-image: url('img/card/card1.png'); }
+    .card:nth-child(2) .card-face.front { background-image: url('img/card/card2.png'); }
+    .card:nth-child(3) .card-face.front { background-image: url('img/card/card3.png'); }
+    .card:nth-child(4) .card-face.front { background-image: url('img/card/card4.png'); }
+    .card:nth-child(5) .card-face.front { background-image: url('img/card/card5.png'); }
+    .card:nth-child(6) .card-face.front { background-image: url('img/card/card6.png'); }
+    .card-container.selected .card:not(.selected) { opacity: 0; pointer-events: none; }
+    .card.selected {
+      left: 50%; top: 50%;
+      --deg: 0deg; --x: 0px; --y: 0px;
+      transform: translateX(-50%) translateY(calc(-50% + 30px)) scale(1.5) rotateY(var(--flip,0deg));
+      transition: transform 0.6s ease;
+    }
+#rewardText {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+  margin-top: 40px;
+  display: none;
+}
+#rewardText.show {
+  display: block;
+}
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+.draw-instruction {
+  text-align: center;
+  font-family: 'Galmuri9', monospace;
+  font-size: 20px;
+  color: #333;
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="window">
+     
+      <div class="title-bar">
+        <div class="title-url"><span>🐭 Rodent's Farm</span></div>
+        <div class="title-buttons">
+          <button class="title-button">−</button>
+          <button class="title-button">×</button>
+          <button class="title-button">♥</button>
+        </div>
+      </div>
+
+      
+      <div class="main-content">
+        
+        <div class="sidebar">
+          <a href="index.html">
+            <button class="sidebar-button " data-tooltip="Home">
+              <img src="img/btn1.png" alt="Home">
+            </button>
+          </a>
+          <a href="Farm.html">
+            <button class="sidebar-button" data-tooltip="Farm">
+              <img src="img/btn2.png" alt="Farm">
+            </button>
+          </a>
+          <a href="#" onclick="location.reload(); return false;">
+          <button class="sidebar-button active" data-tooltip="Quiz">
+            <img src="img/btn3.png" alt="Quiz">
+          </button>
+          </a>
+          <a href="R-news.html">
+            <button class="sidebar-button" data-tooltip="R-news">
+              <img src="img/btn4.png" alt="R-news">
+            </button>
+          </a>
+        </div>
+
+        
+        <div class="main-area">
+        <div class="quiz-wrapper">
+  
+
+    <div class="window-container">
+      <div class="quiz-area">
+        <div class="chat-box" id="chatBox">
+          <div class="message start">
+            <h2>Appear!</h2>
+            <div class="start-img-wrapper">
+            <img src="img/warning.png" class="warning-icon" alt="경고">
+            <img src="img/quiz_ham.gif" class="ham-gif" alt="햄찌피티">
+            </div>
+            <p>
+              AI 햄스터 햄찌피티가 나타났다! 대화해볼까?<br>
+              난 세상에서 가장 똑똑한 햄찌피티지. 너 혹시 설치류가<br>
+              쥐, 다람쥐, 기니피그만 있는 줄 알았어? 그렇다면<br>
+              ‘설치류 지식 레벨 테스트’를 준비했지!
+            </p>
+            <button id="startBtn">Start</button>
+          </div>
+        </div>
+        <div class="input-bar hidden" id="inputBar">
+          <input type="text" id="textAnswer" placeholder="답을 입력하세요…" />
+          <button onclick="handleText()">제출</button>
+        </div>
+      </div>
+    </div>
+   
+  <div class="modal" id="modal" style="display: none;">
+    <button class="close-btn" id="close">✕</button>
+    <div class="draw-instruction" id="drawInstruction">카드를 한 장 골라봐!</div>
+
+    <div id="rewardText">보상입니다!</div>
+    <div class="card-container" id="cardContainer">
+      <div class="card"><div class="card-face back"></div><div class="card-face front"></div></div>
+      <div class="card"><div class="card-face back"></div><div class="card-face front"></div></div>
+      <div class="card"><div class="card-face back"></div><div class="card-face front"></div></div>
+      <div class="card"><div class="card-face back"></div><div class="card-face front"></div></div>
+      <div class="card"><div class="card-face back"></div><div class="card-face front"></div></div>
+      <div class="card"><div class="card-face back"></div><div class="card-face front"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+<div id="emoji-container" style="position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999;"></div>
+        
+
+
+
+
+  <script>
+
+    
+    const quizData = [
+      { type:'choice', question:'가장 몸집이 큰 설치류는?', options:['호저','카피바라','비버'], answer:'카피바라' },
+      { type:'choice', question:'기니피그가 좋아하는 간식은?', options:['🧀 치즈','🥕 당근','🍞 식빵'], answer:'🥕 당근' },
+      { type:'text',   question:'나의 이름을 입력해줘! (힌트: AI🐹)', answer:'햄찌피티' },
+      { type:'image',  question:'이 동물은 누구일까요? 🐾', image:'https://thumb.photo-ac.com/a7/a77da60f85b2a93631b5b70500893636_t.jpeg', options:['햄스터','기니피그','쥐'], answer:'햄스터' },
+      { type:'choice', question:'친칠라는 언제 활동할까?',options:['☀️주행성','🌙야행성','낮과 밤 둘 다'], answer:'🌙야행성'},
+      {type:'image',  question:'이빨의 주인은 누구일까요? 🐾',  image:'img/quiz_capy.jpg', options:['멧밭쥐','비버','카피바라'], answer:'카피바라' }
+
+    ];
+    let currentIndex = 0, score = 0;
+    const chatBox   = document.getElementById('chatBox');
+    const inputBar  = document.getElementById('inputBar');
+    const textInput = document.getElementById('textAnswer');
+    const startBtn  = document.getElementById('startBtn');
+    const modal     = document.getElementById('modal');
+    const closeBtn  = document.getElementById('close');
+    const cards     = document.querySelectorAll('.card');
+    const container = document.getElementById('cardContainer');
+    const rewardTxt = document.getElementById('rewardText');
+
+    startBtn.addEventListener('click', ()=>{
+      chatBox.innerHTML = '';
+      const loader = document.createElement('div');
+      loader.className = 'message loader';
+      loader.innerHTML = `
+        <div class="loader-text">
+          Installing...
+          <img src="https://web.archive.org/web/20091020083817/http://hk.geocities.com/garveyhk/hamster/hamster/question.gif" class="install-gif" alt="">
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>`;
+      chatBox.appendChild(loader);
+      let width = 0;
+      const interval = setInterval(()=>{
+        width += 5;
+        document.getElementById('progressBar').style.width = width + '%';
+        if(width >= 100){
+          clearInterval(interval);
+          chatBox.innerHTML = '';
+          showQuiz();
+        }
+      }, 100);
+    });
+
+    function showQuiz(){
+      const q = quizData[currentIndex];
+      const msg = document.createElement('div');
+      msg.className = 'message bot';
+      let inner = `
+        <img src="img/ham_gpt.png" class="profile" alt="">
+        <div class="ham">${q.question}`;
+      if(q.type==='choice'){
+        inner += `<div class="choices-inline">`;
+        q.options.forEach(opt=> inner += `<button onclick="handleChoice('${opt}')">${opt}</button>`);
+        inner += `</div>`;
+        inputBar.classList.add('hidden');
+      } else if(q.type==='text'){
+        inputBar.classList.remove('hidden');
+        setTimeout(()=> textInput.focus(), 100);
+      } else {
+        inner += `<br><img src="${q.image}" style="width: 220px; height: auto; display: block; margin: 12px auto;">`;
+        inner += `<div class="choices-inline">`;
+        q.options.forEach(opt=> inner += `<button onclick="handleChoice('${opt}')">${opt}</button>`);
+        inner += `</div>`;
+        inputBar.classList.add('hidden');
+      }
+      inner += `</div>`;
+      msg.innerHTML = inner;
+      chatBox.appendChild(msg);
+      scrollToBottom();
+    }
+
+    function handleChoice(sel){
+      userMsg(sel);
+      checkAnswer(sel === quizData[currentIndex].answer);
+    }
+    function handleText(){
+      const v = textInput.value.trim();
+      if(!v) return;
+      userMsg(v);
+      textInput.value = '';
+      inputBar.classList.add('hidden');
+      checkAnswer(v === quizData[currentIndex].answer);
+    }
+    function userMsg(t){
+      const d = document.createElement('div');
+      d.className = 'message user';
+      d.innerHTML = `<div class="msg">${t}</div>`;
+      chatBox.appendChild(d);
+      scrollToBottom();
+    }
+    function checkAnswer(ok){
+      const ans = quizData[currentIndex].answer;
+      const r = document.createElement('div');
+      r.className = 'message bot';
+      r.innerHTML = `
+        <img src="img/ham_gpt.png" class="profile" alt="">
+        <div class="ham">${ok?'⭕ 정답이야! 잘했어!':'✖️ 틀렸어! 정답은 <strong>'+ans+'</strong>야!'}</div>`;
+      chatBox.appendChild(r);
+      if(ok) score++;
+      currentIndex++;
+      setTimeout(()=>{
+        if(currentIndex < quizData.length) showQuiz();
+        else showResult();
+      }, 800);
+    }
+    function showResult(){
+      const r = document.createElement('div');
+      r.className = 'message bot';
+      r.innerHTML = `
+        <img src="img/ham_gpt.png" class="profile" alt="">
+        <div class="ham">🎉 퀴즈 완료!<br/>총 ${quizData.length}문제 중 <strong>${score}개</strong> 맞췄어!</div>`;
+      chatBox.appendChild(r);
+      scrollToBottom();
+
+       if(score === 0){
+        setTimeout(() => {
+          const msg = document.createElement('div');
+          msg.className = 'message bot';
+          msg.innerHTML = `
+            <img src="img/ham_gpt.png" class="profile" alt="">
+            <div class="ham">🙅‍♂️ 모든 문제를 틀렸어요!<br>아쉽지만 보상을 받을 수 없어~~ 😢</div>`;
+          chatBox.appendChild(msg);
+          scrollToBottom();
+        }, 1200);
+        return; 
+      }
+
+      setTimeout(() => {
+    const extra = document.createElement('div');
+    extra.className = 'message bot';
+    extra.innerHTML = `
+      <img src="img/ham_gpt.png" class="profile" alt="햄찌피티">
+      <div class="ham"> 🎇고생한 너에게 내가 보상을 줄게🎁</div>`;
+    chatBox.appendChild(extra);
+    scrollToBottom();
+  }, 1800);
+
+      
+      setTimeout(()=> modal.style.display = 'block', 3500);
+    }
+    function scrollToBottom(){
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+   
+    document.addEventListener('click', e=>{
+      const emojis = ['🧡','🐭','🧀'];
+      for(let i=0;i<8;i++){
+        const emoji = document.createElement('span');
+        emoji.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        emoji.style.position = 'absolute';
+        emoji.style.left = e.clientX+'px';
+        emoji.style.top = e.clientY+'px';
+        emoji.style.fontSize = '24px';
+        emoji.style.opacity = '1';
+        emoji.style.transition = 'all 0.8s ease-out';
+        const angle = Math.random()*2*Math.PI;
+        const dist = 80+Math.random()*50;
+        const x = Math.cos(angle)*dist, y = Math.sin(angle)*dist;
+        requestAnimationFrame(()=>{
+          emoji.style.transform = `translate(${x}px, ${y}px) scale(0.5)`;
+          emoji.style.opacity = '0';
+        });
+        document.getElementById('emoji-container').appendChild(emoji);
+        setTimeout(()=> emoji.remove(), 800);
+      }
+    });
+
+
+
+
+cards.forEach(card => {
+  card.addEventListener('click', () => {
+    if (!container.classList.contains('selected')) {
+      card.classList.add('flipped', 'selected');
+      container.classList.add('selected');
+      rewardTxt.classList.add('show');
+      spawnRewardExplosion(window.innerWidth / 2, window.innerHeight / 2 - 150);
+      document.getElementById('drawInstruction').style.display = 'none';
+    }
+  });
+});
+
+
+closeBtn.addEventListener('click', () => {
+  modal.style.display = 'none';
+  
+  container.classList.remove('selected');
+  rewardTxt.classList.remove('show');
+  cards.forEach(card => card.classList.remove('flipped', 'selected'));
+});
+
+function spawnRewardExplosion(x = window.innerWidth / 2, y = window.innerHeight / 2) {
+  const emojis = ['🎁', '🎉', '🌟'];
+  for (let i = 0; i < 12; i++) {
+    const emoji = document.createElement('span');
+    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    emoji.style.position = 'absolute';
+    emoji.style.left = x + 'px';
+    emoji.style.top = y + 'px';
+    emoji.style.fontSize = '60px';
+    emoji.style.opacity = '1';
+    emoji.style.transition = 'all 1.2s ease-out';
+    const angle = Math.random() * 2 * Math.PI;
+    const dist = 90 + Math.random() * 50;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    requestAnimationFrame(() => {
+      emoji.style.transform = `translate(${dx}px, ${dy}px) scale(0.5)`;
+      emoji.style.opacity = '0';
+    });
+    document.getElementById('emoji-container').appendChild(emoji);
+    setTimeout(() => emoji.remove(), 800);
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rodent's Farm Main</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fastly.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-family: 'Press Start 2P', 'Galmuri11', monospace; }
+    body {
+      background: #feffac url('img/pattern1.png') repeat;
+      background-size: 130px 65px;
+      animation: slidePattern 15s linear infinite;
+      min-height: 100vh;
+      padding: 96px 16px 32px;
+    }
+    @keyframes slidePattern {
+      from { background-position: 256px 0; }
+      to   { background-position: 0 256px; }
+    }
+
+    .container {
+      width: 1080px; height: 855px;
+      margin: -25px auto 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .window {
+      position: relative;
+      width: 1080px;
+      height: 855px;
+      background: url('img/frame2.png') no-repeat top left;
+      background-size: 1080px 855px;
+      overflow: hidden;
+    }
+
+    .title-bar {
+      position: absolute; top: 8px; left: 8px; right: 23px; height: 60px;
+      display: flex; align-items: center; justify-content: flex-end;
+      background: transparent; z-index: 2;
+    }
+    .title-bar .title-url {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #FFF;
+      border-radius: 18px;
+      padding: 6px 16px;
+      border: 2px solid #000;
+      z-index: 5;
+    }
+    .title-bar .title-url span {
+      color: #C85C1A;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .title-bar .title-buttons {
+      display: flex; gap: 8px; z-index: 10;
+      margin-right: 30px;
+    }
+    .title-bar .title-button {
+      width: 32px; height: 32px;
+      background: #FFF;
+      border-radius: 50%;
+      border: 3px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      color: #C85C1A;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .title-bar .title-button:hover {
+      background: #FDE1B4;
+    }
+
+    .main-content {
+      position: absolute; top: 75px; left: 0; right: 0; height: 713px;
+      display: flex; z-index: 1;
+    }
+
+    .sidebar {
+      position: absolute; top: 0px; left: 8px;
+      width: 105px; height: 713px;
+      background: transparent;
+      display: flex; flex-direction: column; gap: 5px;
+      z-index: 2;
+    }
+    .sidebar a {
+      display: flex;
+      justify-content: center;
+      text-decoration: none;
+    }
+    .sidebar a button {
+      margin: 5px 0;
+    }
+
+    .sidebar-button {
+      position: relative;
+      width: 80px; height: 80px;
+      background: transparent url('img/btn_before.png') no-repeat center;
+      background-size: 80px 80px;
+      border: none;
+      cursor: pointer;
+      transition: background-image 0.1s;
+      z-index: 3;
+    }
+    .sidebar-button:hover {
+      background-image: url('img/btn_hover.png');
+    }
+    .sidebar-button.active {
+      background-image: url('img/btn_after.png');
+    }
+    .sidebar-button::before {
+      content: "";
+      position: absolute;
+      top: 4px; left: calc(100% + 4px);
+      width: 120px; height: 60px;
+      background: url('img/tool.png') no-repeat center;
+      background-size: contain;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 10;
+    }
+    .sidebar-button::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 20px; left: calc(100% + 4px);
+      width: 120px; text-align: center;
+      font-size: 14px;
+      color: #000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 11;
+      font-family: 'Galmuri11', monospace;
+      font-weight: 700;
+    }
+    .sidebar-button:hover::before,
+    .sidebar-button:hover::after { opacity: 1; }
+    .sidebar-button img {
+      position: absolute;
+      top: 50%; left: 48%;
+      width: 48px; height: 48px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: left 0.1s;
+    }
+    .sidebar-button.active img { left: 50%; }
+
+    .main-area {
+      position: absolute; top: 0; left: 120px;
+      width: 938px; height: 713px;
+      background: transparent;
+      padding: 0;
+      overflow: auto;
+      display: block;
+      z-index: 1;
+    }
+
+    .floating-cloud {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      pointer-events: none;
+      animation: floatCloud 4.5s ease-in-out infinite;
+      z-index: 10;
+    }
+    @keyframes floatCloud {
+      0%   { transform: translate(-50%, 0px); }
+      50%  { transform: translate(-50%, -15px); }
+      100% { transform: translate(-50%, 0px); }
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      z-index: 12;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .scroll-indicator span {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 16px;
+      color: #000;
+    }
+    .scroll-indicator img.scroll-arrow {
+      width: 32px;
+      height: 32px;
+      margin-top: 4px;
+      animation: arrowFloat 1s ease-in-out infinite alternate;
+    }
+    @keyframes arrowFloat {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    .status-bar {
+      position: absolute;
+      top: 793px; left: 45px;
+      width: 990px; height: 38px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: #C85C1A; background: transparent; z-index: 2;
+    }
+    .status-bar span {
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #000;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    .welcome-texts {
+      position: absolute;
+      top: 40%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 6;
+    }
+    .wave-line {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 26px;
+      color: #000;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .wave {
+      display: inline-block;
+      animation: waveUp 3.5s ease-in-out infinite;
+    }
+    .wave:nth-child(n) {
+      animation-delay: calc(0.2s * var(--i));
+    }
+    @keyframes waveUp {
+      0%, 100% { transform: translateY(0); }
+      30%      { transform: translateY(-4px); }
+      60%      { transform: translateY(2px); }
+    }
+
+    .scroll-sections {
+      position: relative;
+      z-index: 5;
+      padding-top: 700px; 
+    }
+    .section {
+      position: relative;
+      margin: 50px auto;
+      text-align: center;
+      width: 90%;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .section.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-title-box {
+      position: relative;
+      width: 250px;      
+      height: 46px;      
+      margin: 0 auto 16px;
+    }
+    .section-title-box img.section-title {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .section-title-box .section-title-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #000;
+      font-size: 18px;
+      line-height: 1;
+      white-space: nowrap;
+      z-index: 1;
+    }
+
+    
+    .last-section-map {
+      display: block;
+      width: 200px;
+      height: auto;
+      margin: 8px auto 24px;
+      cursor: pointer;
+      animation: blink 4s infinite;
+      transition: transform 0.3s;
+    }
+    .last-section-map:hover {
+      transform: rotate(-5deg);
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    .section-content-box {
+      position: relative;
+      width: 500px;      
+      height: 204px;     
+      margin: 0 auto 100px; 
+
+      text-align: center;
+      padding: 0 10px;
+      font-family: 'Galmuri11', monospace;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    .section-content-box img.section-content {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .section-content-box .section-content-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #000;
+      font-size: 16px;         
+      line-height: 1.4;
+      padding: 2px;            
+      text-align: center;
+      z-index: 1;
+    }
+
+    .home-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      z-index: 0;
+    }
+
+  
+#map-modal {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 938px;
+  height: 713px;
+  z-index: 999;
+}
+
+.map-modal-content {
+  position: relative;
+  width: 700px;
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.map-modal-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.map-close:hover {
+  background: #FDE1B4;
+}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="window">
+     
+      <div class="title-bar">
+        <div class="title-url"><span>🐭 Rodent's Farm</span></div>
+        <div class="title-buttons">
+          <button class="title-button">−</button>
+          <button class="title-button">×</button>
+          <button class="title-button">♥</button>
+        </div>
+      </div>
+
+      
+      <div class="main-content">
+        
+        <div class="sidebar">
+          <a href="#" onclick="location.reload(); return false;">
+          <button class="sidebar-button active" data-tooltip="Home">
+            <img src="img/btn1.png" alt="Home">
+          </button>
+          </a>
+          <a href="Farm.html">
+            <button class="sidebar-button" data-tooltip="Farm">
+              <img src="img/btn2.png" alt="Farm">
+            </button>
+          </a>
+          <a href="Quiz.html">
+            <button class="sidebar-button" data-tooltip="Quiz">
+              <img src="img/btn3.png" alt="Quiz">
+            </button>
+          </a>
+          <a href="R-news.html">
+            <button class="sidebar-button" data-tooltip="R-news">
+              <img src="img/btn4.png" alt="R-news">
+            </button>
+          </a>
+        </div>
+
+        
+        <div class="main-area">
+          
+          <img src="img/cloud.png" class="floating-cloud" />
+
+         
+          <div class="welcome-texts">
+            <div class="wave-line">
+              <span class="wave" style="--i:0">W</span>
+              <span class="wave" style="--i:1">e</span>
+              <span class="wave" style="--i:2">l</span>
+              <span class="wave" style="--i:3">c</span>
+              <span class="wave" style="--i:4">o</span>
+              <span class="wave" style="--i:5">m</span>
+              <span class="wave" style="--i:6">e</span>
+              <span class="wave" style="--i:7">&nbsp;</span>
+              <span class="wave" style="--i:8">t</span>
+              <span class="wave" style="--i:9">o</span>
+            </div>
+            <div class="wave-line">
+              <span class="wave" style="--i:10">R</span>
+              <span class="wave" style="--i:11">o</span>
+              <span class="wave" style="--i:12">d</span>
+              <span class="wave" style="--i:13">e</span>
+              <span class="wave" style="--i:14">n</span>
+              <span class="wave" style="--i:15">t</span>
+              <span class="wave" style="--i:16">'</span>
+              <span class="wave" style="--i:17">s</span>
+              <span class="wave" style="--i:18">&nbsp;</span>
+              <span class="wave" style="--i:19">F</span>
+              <span class="wave" style="--i:20">a</span>
+              <span class="wave" style="--i:21">r</span>
+              <span class="wave" style="--i:22">m</span>
+            </div>
+          </div>
+
+          
+          <div class="scroll-sections">
+            
+            <div class="section">
+              <div class="section-title-box">
+                <img src="img/home_2.png" class="section-title" alt="제목 이미지">
+                <div class="section-title-text"> 로던트 팜 소개</div>
+              </div>
+              <img src="img/map.png" class="last-section-map" alt="지도">
+              <div class="section-content-box">
+                <img src="img/home_3.png" class="section-content" alt="내용 이미지">
+                <div class="section-content-text">
+                  이곳은 Rodent's Farm의 입구!
+                이 농장에서 자유롭게 돌아다니며<br> 귀여운 설치류 친구들을 만나고, 직접 교감해보세요!
+                </div>
+              </div>
+            </div>
+
+            
+            <div class="section">
+              <div class="section-title-box">
+                <img src="img/home_2.png" class="section-title" alt="제목 이미지">
+                <div class="section-title-text">햄찌피티 퀴즈</div>
+              </div>
+              <div class="section-content-box">
+                <img src="img/home_3.png" class="section-content" alt="내용 이미지">
+                <div class="section-content-text">
+                  설치류에 대해 얼마나 알고 있나요? 귀여운 AI 햄스터와 함께 대화하며 퀴즈를 풀어 <br>지식을 쌓아요!
+                </div>
+              </div>
+            </div>
+
+          
+            <div class="section">
+              <div class="section-title-box">
+                <img src="img/home_2.png" class="section-title" alt="제목 이미지">
+                <div class="section-title-text">설치류의 비밀뉴스</div>
+              </div>
+              
+              <div class="section-content-box">
+                <img src="img/home_3.png" class="section-content" alt="내용 이미지">
+                <div class="section-content-text">
+                  설치류와 관련된 흥미로운 기사와 이야기들을 한눈에 모아보는 공간이에요!
+                </div>
+              </div>
+            </div>
+          </div>
+            
+            <div id="map-modal">
+              <div class="map-modal-content">
+                <button class="map-close" id="map-close">×</button>
+                <img src="img/map_img.png" alt="지도 상세 이미지">
+              </div>
+            </div>
+         
+          <img src="img/home.png" class="home-bg" alt="메인 배경" />
+          
+
+          
+          
+          <div class="scroll-indicator">
+            <span>scroll</span>
+            <img src="img/scroll.png" alt="down arrow" class="scroll-arrow" />
+          </div>
+        </div>
+      </div>
+
+    
+      <div class="status-bar">
+        <span>🐭 rodent's farm</span>
+        <span>last updated: just now</span>
+        <span>visitors: 1337</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
+    document.querySelectorAll('.sidebar-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-button').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const mainArea = document.querySelector('.main-area');
+      const indicator = document.querySelector('.scroll-indicator');
+
+      
+      indicator.style.opacity = '1';
+
+      
+      mainArea.addEventListener('scroll', () => {
+        indicator.style.opacity = '0';
+      });
+
+      
+      const sections = document.querySelectorAll('.section');
+      const io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        root: mainArea,
+        threshold: 0.2
+      });
+      sections.forEach(sec => io.observe(sec));
+    });
+  </script>
+
+  <div id="emoji-container" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;"></div>
+  <script>
+    
+    document.addEventListener('click', function (e) {
+      const emojis = ['🧡','🐭','🧀'];
+      const container = document.getElementById('emoji-container');
+      for (let i = 0; i < 8; i++) {
+        const emoji = document.createElement('span');
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.position = 'absolute';
+        emoji.style.left = e.clientX + 'px';
+        emoji.style.top = e.clientY + 'px';
+        emoji.style.fontSize = '24px';
+        emoji.style.pointerEvents = 'none';
+        emoji.style.opacity = '1';
+        emoji.style.transition = 'all 0.8s ease-out';
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 80 + Math.random() * 50;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        requestAnimationFrame(() => {
+          emoji.style.transform = `translate(${x}px, ${y}px) scale(0.5)`;
+          emoji.style.opacity = '0';
+        });
+        container.appendChild(emoji);
+        setTimeout(() => emoji.remove(), 800);
+      }
+    });
+  </script>
+
+<script>
+  const mapBtn = document.querySelector('.last-section-map');
+  const modal = document.getElementById('map-modal');
+  const modalContent = modal.querySelector('.map-modal-content');
+  const mainArea = document.querySelector('.main-area');
+  const closeBtn = document.getElementById('map-close');
+
+  mapBtn?.addEventListener('click', () => {
+    modal.style.display = 'block';
+
+    const scrollTop = mainArea.scrollTop;
+    const visibleHeight = mainArea.clientHeight;
+    const modalHeight = modalContent.offsetHeight;
+
+    const y = scrollTop + visibleHeight - modalHeight-100;
+    modalContent.style.marginTop = y + 'px';
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    modal.style.display = 'none';
+    modalContent.style.marginTop = '0px';
+  });
+</script>
+
+</body>
+</html>
